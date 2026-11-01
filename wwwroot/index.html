@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browse files and folders in your server workspace.">
+  <title>File Browser</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#files">Skip to files</a>
+  <header class="app-header">
+    <a class="brand" href="/" data-home><span class="brand-mark" aria-hidden="true">F</span> File Browser</a>
+    <span class="workspace-label"><span class="status-dot" aria-hidden="true"></span> Local workspace</span>
+  </header>
+
+  <main>
+    <nav id="breadcrumbs" class="breadcrumbs" aria-label="Folder breadcrumb"></nav>
+    <div class="page-heading">
+      <div><p class="eyebrow">YOUR WORKSPACE</p><h1 id="folder-title">Home</h1><p class="subtitle">Browse your folders and find what you need.</p></div>
+      <button id="upload" class="button button-primary" type="button">Upload file</button><input id="picker" type="file" hidden>
+    </div>
+
+    <dl class="summary" aria-label="Current view summary">
+      <div><dt>Folders</dt><dd id="folder-count">—</dd></div>
+      <div><dt>Files</dt><dd id="file-count">—</dd></div>
+      <div><dt>Size of visible items</dt><dd id="total-size">—</dd></div>
+    </dl>
+
+    <section id="files" class="file-panel" aria-label="Files and folders" tabindex="-1">
+      <div class="toolbar">
+        <button id="up" class="button button-secondary" type="button" disabled>↑ Up one level</button>
+        <form id="search-form" class="search-form" role="search">
+          <label class="sr-only" for="search">Search by name</label>
+          <input id="search" name="q" type="search" placeholder="Search files and folders…" autocomplete="off">
+          <button class="button button-secondary" type="submit">Search</button>
+          <button id="clear-search" class="button button-quiet" type="button" hidden>Clear</button>
+        </form>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite">Loading folder…</p>
+      <div class="table-scroll">
+        <table>
+          <caption class="sr-only">Items in the current folder</caption>
+          <thead><tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col">Size</th><th scope="col">Last modified</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+          <tbody id="entries"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty" hidden>This folder is empty.</p>
+      <div class="panel-footer"><span id="item-count">0 items</span><span>Folder sizes include their contents.</span></div>
+    </section>
+  </main>
+</body>
+</html>
