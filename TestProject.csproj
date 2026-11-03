@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <None Include="wwwroot\index.html" />
+    <Compile Remove="TestProject.Tests\**" />
+    <None Remove="TestProject.Tests\**" />
+    <Content Remove="TestProject.Tests\**" />
+    <EmbeddedResource Remove="TestProject.Tests\**" />
   </ItemGroup>
 
 </Project>
