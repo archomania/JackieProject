@@ -26,7 +26,7 @@ namespace TestProject {
             {
                 BadHttpRequestException error => (error.StatusCode, error.Message),
                 ArgumentException => (400, "Invalid path or file name."),
-                FileNotFoundException or DirectoryNotFoundException => (404, "Item not found."), .
+                FileNotFoundException or DirectoryNotFoundException => (404, "Item not found."),
                 UnauthorizedAccessException => (403, "Access denied."),
                 _ => (500, "Could not complete the file operation.")
             };

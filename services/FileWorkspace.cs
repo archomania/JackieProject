@@ -45,6 +45,7 @@ namespace TestProject.Services {
         private static void ValidateName(string name){
             string stem = name.Split('.')[0].TrimEnd().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(name) 
+                || name is "." or ".."
                 || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 
                 || name.StartsWith(Pending, StringComparison.OrdinalIgnoreCase)) {
                 throw new ArgumentException("Invalid file or directory name.");
@@ -100,4 +101,3 @@ namespace TestProject.Services {
         }
     }
 }
-
