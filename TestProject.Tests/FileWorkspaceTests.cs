@@ -58,6 +58,8 @@ public sealed class FileWorkspaceTests : IDisposable
         Assert.Equal("Zulu", entries[0].GetProperty("name").GetString());
         Assert.Equal("folder", entries[0].GetProperty("kind").GetString());
         Assert.Equal("alpha.txt", entries[1].GetProperty("name").GetString());
+        Assert.True(entries[1].TryGetProperty("lastModifiedUtc", out var lastModified));
+        Assert.True(lastModified.TryGetDateTime(out _));
         Assert.Equal(1, result.RootElement.GetProperty("summary").GetProperty("folderCount").GetInt32());
         Assert.Equal(1, result.RootElement.GetProperty("summary").GetProperty("fileCount").GetInt32());
         Assert.Equal(8, result.RootElement.GetProperty("summary").GetProperty("totalFileBytes").GetInt64());

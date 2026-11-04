@@ -4,7 +4,7 @@ namespace TestProject.Services {
         string Path, 
         string Kind, 
         long SizeBytes, 
-        DateTime LastModified);
+        DateTime LastModifiedUtc);
 
     public sealed class FileWorkspace {
         private readonly ILogger<FileWorkspace> _logger;
