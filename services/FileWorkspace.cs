@@ -13,8 +13,7 @@ namespace TestProject.Services {
 
         public FileWorkspace(IConfiguration config, IWebHostEnvironment env, ILogger<FileWorkspace> logger) {
             _logger = logger;
-            var configuredRoot = config["FileBrowser:HomeDirectory"] ?? throw new ArgumentException("FileBrowser:HomeDirectory is not configured.");
-            root = Path.GetFullPath(configuredRoot, env.ContentRootPath);
+            root = Path.GetFullPath(config["FileBrowser:HomeDirectory"] ?? "StoredFiles", env.ContentRootPath);
             Directory.CreateDirectory(root);
         }
 
@@ -27,13 +26,7 @@ namespace TestProject.Services {
                 current = Path.Combine(current, part);
                 RejectLink(current);
             }
-            // Return the resulting safe absolute path.
             return current;
-        }
-
-        public string GetFiles() {
-            // Implement your file browsing logic here
-            return "List of files";
         }
 
         // All the guards
