@@ -21,10 +21,11 @@ public abstract class WorkspaceFixture : IDisposable
         Workspace = CreateWorkspace("StoredFiles");
     }
 
-    protected FileWorkspace CreateWorkspace(string? home) => new(
+    protected FileWorkspace CreateWorkspace(string? home, int maxSizeEntries = 10000) => new(
         new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["FileBrowser:HomeDirectory"] = home
+            ["FileBrowser:HomeDirectory"] = home,
+            ["FileBrowser:MaxSizeEntries"] = maxSizeEntries.ToString()
         }).Build(), new TestEnvironment(ContentRoot), NullLogger<FileWorkspace>.Instance);
 
     protected static FormFile Upload(string name, string content) =>

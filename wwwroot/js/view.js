@@ -98,6 +98,9 @@ export function renderListing(listing) {
   byId("folder-count").textContent = listing.summary.folderCount;
   byId("file-count").textContent = listing.summary.fileCount;
   byId("total-size").textContent = formatBytes(listing.summary.totalFileBytes);
+  byId("size-note").textContent = listing.summary.sizesIncomplete
+    ? "Some sizes are unavailable or exceed the scan limit (—)."
+    : "Folder sizes include their contents.";
   byId("item-count").textContent = `${listing.entries.length} ${listing.entries.length === 1 ? "item" : "items"}`;
   byId("empty").textContent = byId("search").value ? "No matching items." : "This folder is empty.";
   byId("empty").hidden = listing.entries.length !== 0;

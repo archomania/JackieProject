@@ -3,12 +3,23 @@ import { readState, stateUrl, parentPath } from "./url-state.js?v=folder-dialog-
 import { renderNavigation, renderListing, clearListing, showStatus, setBusy } from "./view.js?v=folder-dialog-2";
 
 let pendingRequest;
+let folderAvailable = false;
+let uploadInProgress = false;
+let folderInProgress = false;
+const locationKey = () => location.pathname + location.search;
+
+function refreshActionButtons() {
+  uploadButton.disabled = !folderAvailable || uploadInProgress;
+  createFolderButton.disabled = !folderAvailable || folderInProgress;
+}
 
 async function load() {
   pendingRequest?.abort();
   const request = new AbortController();
   pendingRequest = request;
   const state = readState(location.search);
+  folderAvailable = false;
+  refreshActionButtons();
   renderNavigation(state);
   clearListing();
   setBusy(true);
@@ -19,7 +30,11 @@ async function load() {
     // A slower response must not overwrite the folder the user just opened.
     if (request.signal.aborted) return;
     renderListing(listing);
-    showStatus(state.q ? `Results for “${state.q}”` : "Showing the current folder");
+    folderAvailable = true;
+    refreshActionButtons();
+    showStatus(listing.listingIncomplete
+      ? "Some items changed while loading. Refresh to try again."
+      : state.q ? `Results for “${state.q}”` : "Showing the current folder");
   } catch (error) {
     if (!request.signal.aborted) showStatus(error.message, true);
   } finally {
@@ -28,19 +43,12 @@ async function load() {
 }
 
 function confirmDelete(name) {
-  try {
-    return Promise.resolve(window.confirm(`Delete "${name}"?`));
-  } catch (error) {
-    if (!(error instanceof Error) || !error.message.includes("confirm() is not supported")) throw error;
-    deleteMessage.textContent = `Delete "${name}"?`;
+  deleteMessage.textContent = `Delete “${name}”? Folders and all their contents will be permanently removed.`;
+  deleteDialog.returnValue = "cancel";
+  return new Promise((resolve) => {
+    deleteDialog.addEventListener("close", () => resolve(deleteDialog.returnValue === "delete"), { once: true });
     deleteDialog.showModal();
-    return new Promise((resolve) => {
-      deleteForm.addEventListener("submit", (event) => {
-        resolve(event.submitter?.value === "delete");
-      }, { once: true });
-      deleteDialog.addEventListener("cancel", () => resolve(false), { once: true });
-    });
-  }
+  });
 }
 
 function navigate(state) {
@@ -65,17 +73,18 @@ document.addEventListener("click", (event) => {
 async function removeEntry(button) {
   const path = button.dataset.deletePath;
   const name = button.dataset.deleteName;
-  if (!path || !name || !(await confirmDelete(name))) return;
-
+  if (!path || !name) return;
+  const startedAt = locationKey();
   button.disabled = true;
   try {
+    if (!(await confirmDelete(name))) return;
     showStatus("Deleting " + name + "…");
     await deleteEntry(path);
-    const state = readState(location.search);
-    navigate({ path: state.path, q: state.q });
+    if (locationKey() === startedAt) await load();
   } catch (error) {
+    if (locationKey() === startedAt) showStatus(error.message, true);
+  } finally {
     button.disabled = false;
-    showStatus(error.message, true);
   }
 }
 
@@ -93,7 +102,6 @@ document.getElementById("clear-search").addEventListener("click", () => {
 });
 
 window.addEventListener("popstate", () => void load());
-void load();
 
 const uploadButton = document.getElementById("upload");
 const picker = document.getElementById("picker");
@@ -102,7 +110,6 @@ const folderDialog = document.getElementById("folder-dialog");
 const folderForm = document.getElementById("folder-form");
 const folderName = document.getElementById("folder-name");
 const deleteDialog = document.getElementById("delete-dialog");
-const deleteForm = document.getElementById("delete-form");
 const deleteMessage = document.getElementById("delete-message");
 
 function requestFolderName() {
@@ -118,35 +125,44 @@ function requestFolderName() {
 }
 
 createFolderButton.addEventListener("click", async () => {
+  const startedAt = locationKey();
+  const { path } = readState(location.search);
+  folderInProgress = true;
+  refreshActionButtons();
   try {
     const name = await requestFolderName();
     if (name === null) return;
 
-    const { path } = readState(location.search);
-    createFolderButton.disabled = true;
     showStatus("Creating folder…");
     await createFolder(path, name.trim());
-    if (readState(location.search).path === path) navigate({ path, q: "" });
+    if (locationKey() === startedAt) await load();
   } catch (error) {
-    showStatus(error.message, true);
+    if (locationKey() === startedAt) showStatus(error.message, true);
   } finally {
-    createFolderButton.disabled = false;
+    folderInProgress = false;
+    refreshActionButtons();
   }
 });
 uploadButton.addEventListener("click", () => picker.click());
 picker.addEventListener("change", async () => {
   const file = picker.files[0];
   if (!file) return;
+  const startedAt = locationKey();
   const { path } = readState(location.search);
-  uploadButton.disabled = true;
+  uploadInProgress = true;
+  refreshActionButtons();
   try {
+    if (file.size > 10 * 1024 * 1024) throw new Error("Choose a file of 10 MiB or less.");
     showStatus("Uploading " + file.name + "…");
     await uploadFile(path, file);
-    if (readState(location.search).path === path) navigate({ path, q: "" });
+    if (locationKey() === startedAt) await load();
   } catch (error) {
-    showStatus(error.message, true);
+    if (locationKey() === startedAt) showStatus(error.message, true);
   } finally {
     picker.value = "";
-    uploadButton.disabled = false;
+    uploadInProgress = false;
+    refreshActionButtons();
   }
 });
+
+void load();

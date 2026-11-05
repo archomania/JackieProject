@@ -34,7 +34,7 @@ namespace TestProject.Controllers {
         [HttpPost("upload")]
         [RequestSizeLimit(11 * 1024 * 1024)]
         public async Task<IActionResult> Upload([FromQuery] string? path, [FromForm] IFormFile file, CancellationToken token) {
-            if (file.Length > 10 * 1024 * 1024)
+            if (file.Length > FileWorkspace.MaxUploadBytes)
                 return Problem(statusCode: 413, title: "Choose a file of 10 MiB or less.");
             await workspace.Save(path, file, token);
             return Ok(new { name = file.FileName });

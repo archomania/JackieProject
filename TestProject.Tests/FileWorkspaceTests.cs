@@ -83,7 +83,11 @@ public sealed class FileWorkspaceTests : WorkspaceFixture
     {
         var result = Json(Workspace.List(null, null, default));
         Assert.Empty(result.GetProperty("entries").EnumerateArray());
-        Assert.All(result.GetProperty("summary").EnumerateObject(), p => Assert.Equal(0, p.Value.GetInt64()));
+        var summary = result.GetProperty("summary");
+        Assert.Equal(0, summary.GetProperty("folderCount").GetInt32());
+        Assert.Equal(0, summary.GetProperty("fileCount").GetInt32());
+        Assert.Equal(0, summary.GetProperty("totalFileBytes").GetInt64());
+        Assert.False(summary.GetProperty("sizesIncomplete").GetBoolean());
     }
 
     [Fact]
