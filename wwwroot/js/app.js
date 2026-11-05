@@ -1,6 +1,6 @@
-import { getListing, uploadFile } from "./api.js";
-import { readState, stateUrl, parentPath } from "./url-state.js";
-import { renderNavigation, renderListing, clearListing, showStatus, setBusy } from "./view.js";
+import { createFolder, deleteEntry, getListing, uploadFile } from "./api.js?v=folder-dialog-2";
+import { readState, stateUrl, parentPath } from "./url-state.js?v=folder-dialog-2";
+import { renderNavigation, renderListing, clearListing, showStatus, setBusy } from "./view.js?v=folder-dialog-2";
 
 let pendingRequest;
 
@@ -27,6 +27,22 @@ async function load() {
   }
 }
 
+function confirmDelete(name) {
+  try {
+    return Promise.resolve(window.confirm(`Delete "${name}"?`));
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes("confirm() is not supported")) throw error;
+    deleteMessage.textContent = `Delete "${name}"?`;
+    deleteDialog.showModal();
+    return new Promise((resolve) => {
+      deleteForm.addEventListener("submit", (event) => {
+        resolve(event.submitter?.value === "delete");
+      }, { once: true });
+      deleteDialog.addEventListener("cancel", () => resolve(false), { once: true });
+    });
+  }
+}
+
 function navigate(state) {
   const url = stateUrl(state);
   if (`${location.pathname}${location.search}` !== url) history.pushState(null, "", url);
@@ -34,12 +50,34 @@ function navigate(state) {
 }
 
 document.addEventListener("click", (event) => {
+  const remove = event.target.closest("button[data-delete-path]");
+  if (remove) {
+    void removeEntry(remove);
+    return;
+  }
   const link = event.target.closest("a[data-path], a[data-home]");
   // Keep native Ctrl/Cmd-click and new-tab behavior for shareable links.
   if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   navigate({ path: link.dataset.path || "", q: "" });
 });
+
+async function removeEntry(button) {
+  const path = button.dataset.deletePath;
+  const name = button.dataset.deleteName;
+  if (!path || !name || !(await confirmDelete(name))) return;
+
+  button.disabled = true;
+  try {
+    showStatus("Deleting " + name + "…");
+    await deleteEntry(path);
+    const state = readState(location.search);
+    navigate({ path: state.path, q: state.q });
+  } catch (error) {
+    button.disabled = false;
+    showStatus(error.message, true);
+  }
+}
 
 document.getElementById("up").addEventListener("click", () => {
   navigate({ path: parentPath(readState(location.search).path), q: "" });
@@ -59,6 +97,42 @@ void load();
 
 const uploadButton = document.getElementById("upload");
 const picker = document.getElementById("picker");
+const createFolderButton = document.getElementById("create-folder");
+const folderDialog = document.getElementById("folder-dialog");
+const folderForm = document.getElementById("folder-form");
+const folderName = document.getElementById("folder-name");
+const deleteDialog = document.getElementById("delete-dialog");
+const deleteForm = document.getElementById("delete-form");
+const deleteMessage = document.getElementById("delete-message");
+
+function requestFolderName() {
+  folderForm.reset();
+  folderDialog.returnValue = "cancel";
+  return new Promise((resolve) => {
+    folderDialog.addEventListener("close", () => {
+      resolve(folderDialog.returnValue === "create" ? folderName.value : null);
+    }, { once: true });
+    folderDialog.showModal();
+    folderName.focus();
+  });
+}
+
+createFolderButton.addEventListener("click", async () => {
+  try {
+    const name = await requestFolderName();
+    if (name === null) return;
+
+    const { path } = readState(location.search);
+    createFolderButton.disabled = true;
+    showStatus("Creating folder…");
+    await createFolder(path, name.trim());
+    if (readState(location.search).path === path) navigate({ path, q: "" });
+  } catch (error) {
+    showStatus(error.message, true);
+  } finally {
+    createFolderButton.disabled = false;
+  }
+});
 uploadButton.addEventListener("click", () => picker.click());
 picker.addEventListener("change", async () => {
   const file = picker.files[0];

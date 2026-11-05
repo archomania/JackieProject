@@ -25,8 +25,7 @@ namespace TestProject.Controllers {
             Ok(workspace.List(path, q, token));
 
         [HttpGet("download")]
-        public IActionResult Download(string path)
-        {
+        public IActionResult Download(string path) {
             string fullPath = workspace.Resolve(path);
             if (Directory.Exists(fullPath)) return BadRequest();
             return File(System.IO.File.OpenRead(fullPath), "application/octet-stream", Path.GetFileName(fullPath));
@@ -34,12 +33,23 @@ namespace TestProject.Controllers {
 
         [HttpPost("upload")]
         [RequestSizeLimit(11 * 1024 * 1024)]
-        public async Task<IActionResult> Upload([FromQuery] string? path, [FromForm] IFormFile file, CancellationToken token)
-        {
+        public async Task<IActionResult> Upload([FromQuery] string? path, [FromForm] IFormFile file, CancellationToken token) {
             if (file.Length > 10 * 1024 * 1024)
                 return Problem(statusCode: 413, title: "Choose a file of 10 MiB or less.");
             await workspace.Save(path, file, token);
             return Ok(new { name = file.FileName });
+        }
+
+        [HttpPost("create-folder")]
+        public IActionResult CreateFolder([FromQuery] string? path, [FromForm] string name){
+            workspace.CreateFolder(path, name);
+            return Ok(new { name });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete([FromQuery] string path) {
+            workspace.Delete(path);
+            return NoContent();
         }
     }
 }

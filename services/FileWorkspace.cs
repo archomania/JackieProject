@@ -92,5 +92,31 @@ namespace TestProject.Services {
              // Always remove the temporary file after success or failure.
             finally { File.Delete(temp); }
         }
+
+        public void CreateFolder(string? path, string name) {
+            ValidateName(name);
+            string folder = Resolve(path);
+
+            if(!Directory.Exists(folder))
+                throw new DirectoryNotFoundException();
+
+            string destination = Path.Combine(folder, name);
+
+            if(Directory.Exists(destination) || File.Exists(destination))
+                throw new BadHttpRequestException("An item with that name already exists.", 409);
+            Directory.CreateDirectory(destination);
+        }
+
+        public void Delete(string path) {
+            string target = Resolve(path);
+            if (string.Equals(target, root, StringComparison.OrdinalIgnoreCase))
+                throw new BadHttpRequestException("The workspace folder cannot be deleted.", 400);
+            if (File.Exists(target))
+                File.Delete(target);
+            else if (Directory.Exists(target))
+                Directory.Delete(target, recursive: true);
+            else
+                throw new FileNotFoundException();
+        }
     }
 }

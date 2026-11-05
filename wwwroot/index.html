@@ -7,7 +7,7 @@
   <title>File Browser</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/css/styles.css">
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/app.js?v=folder-dialog-2"></script>
 </head>
 <body>
   <a class="skip-link" href="#files">Skip to files</a>
@@ -20,7 +20,7 @@
     <nav id="breadcrumbs" class="breadcrumbs" aria-label="Folder breadcrumb"></nav>
     <div class="page-heading">
       <div><p class="eyebrow">YOUR WORKSPACE</p><h1 id="folder-title">Home</h1><p class="subtitle">Browse your folders and find what you need.</p></div>
-      <button id="upload" class="button button-primary" type="button">Upload file</button><input id="picker" type="file" hidden>
+      <div><button id="create-folder" class="button button-secondary" type="button">New Folder</button><button id="upload" class="button button-primary" type="button">Upload file</button><input id="picker" type="file" hidden></div>
     </div>
 
     <dl class="summary" aria-label="Current view summary">
@@ -52,5 +52,24 @@
       <div class="panel-footer"><span id="item-count">0 items</span><span>Folder sizes include their contents.</span></div>
     </section>
   </main>
+  <dialog id="folder-dialog" aria-labelledby="folder-name-label">
+    <form method="dialog" id="folder-form">
+      <label id="folder-name-label" for="folder-name">New folder name</label>
+      <input id="folder-name" name="name" required autocomplete="off">
+      <div>
+        <button class="button button-secondary" value="cancel" type="submit" formnovalidate>Cancel</button>
+        <button class="button button-primary" value="create" type="submit">Create</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog">
+    <form method="dialog" id="delete-form">
+      <p id="delete-message"></p>
+      <div>
+        <button class="button button-secondary" value="cancel" type="submit">Cancel</button>
+        <button class="button button-primary" value="delete" type="submit">Delete</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

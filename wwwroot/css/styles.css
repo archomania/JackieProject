@@ -52,6 +52,14 @@ tbody tr:hover { background: #fafbfe; }
 .download-button { background: none; border: 0; font-size: 12px; color: var(--muted); }
 .empty { text-align: center; color: var(--muted); padding: 45px 16px; }
 .panel-footer { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 11px; }
+dialog { border: 1px solid var(--line); border-radius: 10px; padding: 22px; color: var(--ink); }
+dialog::backdrop { background: rgb(28 41 64 / 35%); }
+#folder-form { display: grid; gap: 14px; min-width: 260px; }
+#folder-form input { padding: 9px 12px; border: 1px solid #d4dce6; border-radius: 7px; }
+#folder-form div { display: flex; justify-content: flex-end; gap: 8px; }
+#delete-form { display: grid; gap: 14px; min-width: 260px; }
+#delete-form p { margin: 0; }
+#delete-form div { display: flex; justify-content: flex-end; gap: 8px; }
 @media (max-width: 650px) {
   .app-header { padding: 15px 18px; min-height: 70px; }
   .workspace-label { font-size: 11px; }

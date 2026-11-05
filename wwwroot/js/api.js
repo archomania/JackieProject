@@ -37,3 +37,27 @@ export async function uploadFile(path, file) {
     throw new Error(problem.title || `Upload failed (${response.status}).`);
   }
 }
+
+export async function createFolder(path, name) {
+  const body = new FormData();
+  body.append("name", name);
+  const response = await fetch("/api/files/create-folder?" + new URLSearchParams({ path }), {
+    method: "POST",
+    body
+  });
+  if (!response.ok) {
+    const problem = await response.json().catch(() => ({}));
+    throw new Error(problem.title || `Folder creation failed (${response.status}).`);
+  }
+  return response.json();
+}
+
+export async function deleteEntry(path) {
+  const response = await fetch("/api/files?" + new URLSearchParams({ path }), {
+    method: "DELETE"
+  });
+  if (!response.ok) {
+    const problem = await response.json().catch(() => ({}));
+    throw new Error(problem.title || `Delete failed (${response.status}).`);
+  }
+}

@@ -15,7 +15,14 @@ namespace TestProject {
 
       app.UseDefaultFiles();
 
-      app.UseStaticFiles();
+      app.UseStaticFiles(new StaticFileOptions
+      {
+        OnPrepareResponse = context =>
+        {
+          if (app.Environment.IsDevelopment())
+            context.Context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        }
+      });
       
       app.Use(async (context, next) =>
       {

@@ -1,4 +1,4 @@
-import { stateUrl } from "./url-state.js";
+import { stateUrl } from "./url-state.js?v=folder-dialog-2";
 
 const byId = (id) => document.getElementById(id);
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
@@ -82,6 +82,14 @@ export function renderListing(listing) {
       download.title = "Download " + entry.name;
       actions.append(download);
     }
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "download-button delete-button";
+    remove.textContent = "Delete";
+    remove.dataset.deletePath = entry.path;
+    remove.dataset.deleteName = entry.name;
+    remove.title = "Delete " + entry.name;
+    actions.append(remove);
     row.append(actions);
     fragment.append(row);
   }
