@@ -79,6 +79,11 @@ namespace TestProject.Services {
         }
 
         public async Task Save(string? path, IFormFile file, CancellationToken token) {
+            if (file.Length > MaxUploadBytes)
+                throw new BadHttpRequestException(
+                    "Choose a file of 10 MiB or less.",
+                    StatusCodes.Status413PayloadTooLarge);
+
             string folder = Resolve(path);
             ValidateName(file.FileName);
             string destination = Path.Combine(folder, file.FileName);

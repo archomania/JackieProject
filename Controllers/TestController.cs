@@ -8,6 +8,7 @@ namespace TestProject.Controllers {
 
         private readonly ILogger<TestController> _logger;
         private readonly FileWorkspace workspace;
+        public const long MaxUploadBytes = 10 * 1024 * 1024;
 
         public TestController(
             ILogger<TestController> logger,
@@ -32,7 +33,7 @@ namespace TestProject.Controllers {
         }
 
         [HttpPost("upload")]
-        [RequestSizeLimit(11 * 1024 * 1024)]
+        [RequestSizeLimit(MaxUploadBytes)]
         public async Task<IActionResult> Upload([FromQuery] string? path, [FromForm] IFormFile file, CancellationToken token) {
             if (file.Length > FileWorkspace.MaxUploadBytes)
                 return Problem(statusCode: 413, title: "Choose a file of 10 MiB or less.");
