@@ -81,7 +81,7 @@ namespace TestProject.Services {
         public async Task Save(string? path, IFormFile file, CancellationToken token) {
             if (file.Length > MaxUploadBytes)
                 throw new BadHttpRequestException(
-                    "Choose a file of 10 MiB or less.",
+                    "Choose a file of 10 MB or less.",
                     StatusCodes.Status413PayloadTooLarge);
 
             string folder = Resolve(path);
