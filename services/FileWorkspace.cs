@@ -8,6 +8,7 @@ namespace TestProject.Services {
 
     public sealed class FileWorkspace {
         private readonly ILogger<FileWorkspace> _logger;
+        public const long MaxUploadBytes = 10 * 1024 * 1024;
         private readonly string root;
         private const string Pending = ".upload-";
 
